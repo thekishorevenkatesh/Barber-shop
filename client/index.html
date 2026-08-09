@@ -13,15 +13,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/player-extras.css" />
+    <link rel="stylesheet" href="css/room.css" />
   </head>
   <body>
     <div class="wallpaper" aria-hidden="true"></div><div class="overlay" aria-hidden="true"></div><div class="grain" aria-hidden="true"></div>
+    <section class="entry-screen" id="entry-screen" aria-labelledby="entry-title">
+      <div class="entry-card">
+        <span class="brand-icon" aria-hidden="true">✂</span>
+        <h2 id="entry-title">ಕ್ಷೌರದ ಅಂಗಡಿ</h2>
+        <p>What would you like to do?</p>
+        <button class="entry-action primary" id="guest-btn" type="button">Continue as Guest</button>
+        <button class="entry-action" id="create-room-btn" type="button">Create a Room</button>
+        <button class="entry-action" id="show-join-btn" type="button">Join a Room</button>
+        <form class="join-form hidden" id="join-form">
+          <label for="room-code-input">Enter room code</label>
+          <input id="room-code-input" maxlength="6" autocomplete="off" placeholder="K7M4Q2" />
+          <input id="display-name-input" maxlength="24" autocomplete="name" placeholder="Your name (optional)" />
+          <button class="entry-action primary" type="submit">Join Room</button>
+        </form>
+        <p class="entry-error" id="entry-error" role="alert"></p>
+      </div>
+    </section>
     <main class="app">
       <header class="top-bar">
         <div class="brand"><span class="brand-icon" aria-hidden="true">✂</span><h1>ಕ್ಷೌರದ ಅಂಗಡಿ</h1></div>
         <div class="online-pill"><span class="online-dot" aria-hidden="true"></span>90s radio</div>
       </header>
       <p class="eyebrow">EST. 1997</p>
+      <aside class="room-panel hidden" id="room-panel" aria-label="Shared music room">
+        <div class="room-panel-header"><span id="connection-status">○ Connecting…</span><button id="leave-room-btn" type="button">Leave Room</button></div>
+        <div class="room-code">ROOM: <strong id="room-code">------</strong><button id="copy-room-code" type="button">Copy</button></div>
+        <p class="members-title">Members</p><ul id="member-list" class="member-list"></ul>
+        <p id="talk-status" class="talk-status" role="status">Hold to talk</p>
+        <button id="talk-btn" class="talk-btn" type="button">HOLD TO TALK</button>
+      </aside>
       <footer class="player" id="player-shell" aria-label="Music player">
         <button class="island-summary" id="player-toggle" type="button" aria-expanded="false" aria-controls="player-details">
           <span class="mini-art"><img id="mini-cover" src="" alt="" /></span><span class="mini-meta"><strong id="mini-title">Loading…</strong><small id="mini-artist"></small></span><span class="equalizer" aria-hidden="true"><i></i><i></i><i></i></span><span class="mini-play" aria-hidden="true"><svg id="mini-icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg><svg id="mini-icon-pause" class="hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></span>
@@ -35,6 +60,6 @@
       </footer>
     </main>
     <div id="yt-player" class="yt-hidden" aria-hidden="true"></div>
-    <script src="data/playlist.js"></script><script src="js/player.js"></script><script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js?v=5");</script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" crossorigin="anonymous"></script><script src="js/config.js"></script><script src="data/playlist.js"></script><script src="js/room.js"></script><script src="js/player.js"></script><script src="js/walkie-talkie.js"></script><script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js?v=7");</script>
   </body>
 </html>

@@ -110,16 +110,21 @@
   }
 
   function next() {
+    if (window.roomClient && window.roomClient.isActive()) return window.roomClient.command("MUSIC_NEXT");
     index = (index + 1) % playlist.length;
     loadTrack(true);
   }
 
   function prev() {
+    if (window.roomClient && window.roomClient.isActive()) return window.roomClient.command("MUSIC_PREVIOUS");
     index = (index - 1 + playlist.length) % playlist.length;
     loadTrack(true);
   }
 
   function togglePlay() {
+    if (window.roomClient && window.roomClient.isActive()) {
+      return window.roomClient.command(player && ready && player.getPlayerState() === YT.PlayerState.PLAYING ? "MUSIC_PAUSE" : "MUSIC_PLAY", getPosition());
+    }
     if (!player || !ready) {
       setStatus("Loading YouTube player…");
       initYouTube(function () {
@@ -145,6 +150,7 @@
     if (!player || !ready) return;
     const total = player.getDuration();
     if (total > 0) {
+      if (window.roomClient && window.roomClient.isActive()) return window.roomClient.command("MUSIC_SEEK", total * fraction);
       player.seekTo(total * fraction, true);
       updateProgress();
     }
@@ -242,6 +248,7 @@
           }
         },
         onStateChange: function (event) {
+          if (window.roomClient && window.roomClient.isApplying()) return;
           if (event.data === YT.PlayerState.ENDED) {
             next();
           } else if (event.data === YT.PlayerState.PLAYING) {
@@ -308,6 +315,23 @@
   els.progressBar.addEventListener("input", function () {
     seek(Number(els.progressBar.value) / 100);
   });
+
+  function getPosition() { return player && ready ? player.getCurrentTime() : 0; }
+  window.musicPlayer = {
+    getIndex: function () { return index; },
+    getPosition: getPosition,
+    applyRoomState: function (state) {
+      const targetIndex = playlist.findIndex(function (track) { return track.id === state.songId; });
+      if (targetIndex < 0) return;
+      const target = Math.max(0, state.position + (state.isPlaying ? (Date.now() - state.updatedAt) / 1000 : 0));
+      const apply = function () {
+        index = targetIndex; updateUI();
+        player.loadVideoById(playlist[index].id, target);
+        if (state.isPlaying) { player.playVideo(); setPlaying(true); startTick(); } else { player.pauseVideo(); setPlaying(false); stopTick(); }
+      };
+      if (!ready) initYouTube(apply); else apply();
+    }
+  };
 
   updateUI();
   setStatus("Loading player…");

@@ -1,0 +1,18 @@
+services:
+  coturn:
+    image: coturn/coturn
+    restart: unless-stopped
+    network_mode: host
+    command:
+      - -n
+      - --log-file=stdout
+      - --fingerprint
+      - --use-auth-secret
+      - --static-auth-secret=${TURN_SHARED_SECRET:?Set TURN_SHARED_SECRET in the deployment environment}
+      - --realm=${TURN_REALM:-turn.example.com}
+      - --external-ip=${TURN_EXTERNAL_IP:?Set the server public IPv4 address}
+      - --min-port=49160
+      - --max-port=49200
+      - --no-multicast-peers
+      - --no-loopback-peers
+      - --stale-nonce
