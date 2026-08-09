@@ -1,0 +1,67 @@
+.player.expanded .player-details { max-height: 230px; }
+
+.player-footer { margin-top: .75rem; text-align: center; }
+
+.player-status {
+  font-family: "Space Mono", monospace;
+  font-size: .58rem;
+}
+
+.player-status { color: rgba(245, 230, 200, .58); }
+
+.volume-wrap { display: flex; align-items: center; gap: .6rem; max-height: 0; margin-top: 0; overflow: hidden; opacity: 0; transition: max-height .25s ease, margin .25s ease, opacity .2s ease; }
+.volume-wrap span { font-family: "Space Mono", monospace; font-size: .56rem; color: rgba(245, 230, 200, .55); }
+.volume-wrap input { flex: 1; accent-color: var(--gold); cursor: pointer; }
+.player.volume-open .volume-wrap { max-height: 30px; margin-top: .7rem; opacity: 1; }
+.player.expanded.volume-open .player-details { max-height: 260px; }
+
+.progress-bar {
+  --progress: 0%;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 4px;
+  background: linear-gradient(90deg, var(--gold) var(--progress), rgba(255,255,255,.14) var(--progress));
+}
+
+.progress-bar::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 3px rgba(232,184,74,.16);
+}
+
+.progress-bar::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: var(--gold); }
+.progress-bar:focus-visible { outline: 2px solid var(--gold); outline-offset: 5px; }
+
+.player-footer { display: flex; align-items: center; justify-content: center; gap: .8rem; }
+.player.is-playing .mini-art { animation: spin 7s linear infinite; }
+.player:not(.is-playing) .equalizer i { animation-play-state: paused; opacity: .45; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 380px) {
+  .app { padding-inline: .7rem; padding-top: .8rem; }
+  .top-bar { margin-bottom: 1.1rem; }
+  .brand { gap: .38rem; }
+  .brand h1 { font-size: .96rem; letter-spacing: .02em; }
+  .online-pill { padding: .3rem .55rem; font-size: .62rem; }
+  .island-summary { min-height: 58px; gap: .5rem; padding: .35rem .45rem; }
+  .mini-art { width:44px; height:44px; flex-basis:44px; }
+  .mini-meta strong { font-size: .75rem; }
+  .player.expanded .player-details { padding-inline: .85rem; }
+  .controls { gap: 1rem; }
+}
+
+@media (max-height: 650px) {
+  .app { padding-top: .75rem; }
+  .top-bar { margin-bottom: .8rem; }
+  .eyebrow { margin-bottom: .15rem; }
+  .player { bottom: max(.55rem, env(safe-area-inset-bottom)); }
+}
+
+@media (min-width: 760px) {
+  .player { width: min(560px, calc(100% - 3rem)); }
+  .island-summary { width: min(420px, 100%); }
+}
