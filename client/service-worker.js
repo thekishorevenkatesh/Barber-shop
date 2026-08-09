@@ -1,4 +1,4 @@
-const CACHE_NAME = "kshaura-angadi-v5";
+const CACHE_NAME = "kshaura-angadi-v7";
 const APP_SHELL = [
   "./",
   "index.html",
@@ -6,6 +6,10 @@ const APP_SHELL = [
   "css/player-extras.css",
   "data/playlist.js",
   "js/player.js",
+  "js/room.js",
+  "js/config.js",
+  "js/walkie-talkie.js",
+  "css/room.css",
   "favicon.svg",
   "manifest.json",
 ];
