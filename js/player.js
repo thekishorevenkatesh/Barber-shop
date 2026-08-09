@@ -168,6 +168,10 @@
     youtubeLoading = true;
     const tag = document.createElement("script");
     tag.src = "https://www.youtube.com/iframe_api";
+    tag.onerror = function () {
+      youtubeLoading = false;
+      setStatus("Unable to load the music service");
+    };
     document.head.appendChild(tag);
     window.onYouTubeIframeAPIReady = function () {
       createPlayer();
@@ -207,6 +211,7 @@
         rel: 0,
         iv_load_policy: 3,
         playsinline: 1,
+        origin: window.location.origin,
       },
       events: {
         onReady: function () {
