@@ -110,20 +110,43 @@
   }
 
   function next() {
-    if (window.roomClient && window.roomClient.isActive()) return window.roomClient.command("MUSIC_NEXT");
+    if (window.roomClient && window.roomClient.isActive()) {
+      index = (index + 1) % playlist.length;
+      loadTrack(true);
+      return window.roomClient.command("MUSIC_NEXT", 0);
+    }
     index = (index + 1) % playlist.length;
     loadTrack(true);
   }
 
   function prev() {
-    if (window.roomClient && window.roomClient.isActive()) return window.roomClient.command("MUSIC_PREVIOUS");
+    if (window.roomClient && window.roomClient.isActive()) {
+      index = (index - 1 + playlist.length) % playlist.length;
+      loadTrack(true);
+      return window.roomClient.command("MUSIC_PREVIOUS", 0);
+    }
     index = (index - 1 + playlist.length) % playlist.length;
     loadTrack(true);
   }
 
   function togglePlay() {
     if (window.roomClient && window.roomClient.isActive()) {
-      return window.roomClient.command(player && ready && player.getPlayerState() === YT.PlayerState.PLAYING ? "MUSIC_PAUSE" : "MUSIC_PLAY", getPosition());
+      if (!player || !ready) {
+        setStatus("Music player is still loading…");
+        return;
+      }
+      const playing = player.getPlayerState() === YT.PlayerState.PLAYING;
+      if (playing) {
+        player.pauseVideo();
+        setPlaying(false);
+        stopTick();
+      } else {
+        // This runs directly inside the user click, so browsers permit audio.
+        player.playVideo();
+        setPlaying(true);
+        startTick();
+      }
+      return window.roomClient.command(playing ? "MUSIC_PAUSE" : "MUSIC_PLAY", getPosition());
     }
     if (!player || !ready) {
       setStatus("Loading YouTube player…");
@@ -150,7 +173,11 @@
     if (!player || !ready) return;
     const total = player.getDuration();
     if (total > 0) {
-      if (window.roomClient && window.roomClient.isActive()) return window.roomClient.command("MUSIC_SEEK", total * fraction);
+      if (window.roomClient && window.roomClient.isActive()) {
+        player.seekTo(total * fraction, true);
+        updateProgress();
+        return window.roomClient.command("MUSIC_SEEK", total * fraction);
+      }
       player.seekTo(total * fraction, true);
       updateProgress();
     }
@@ -325,9 +352,20 @@
       if (targetIndex < 0) return;
       const target = Math.max(0, state.position + (state.isPlaying ? (Date.now() - state.updatedAt) / 1000 : 0));
       const apply = function () {
-        index = targetIndex; updateUI();
-        player.loadVideoById(playlist[index].id, target);
-        if (state.isPlaying) { player.playVideo(); setPlaying(true); startTick(); } else { player.pauseVideo(); setPlaying(false); stopTick(); }
+        const alreadyOnTrack = index === targetIndex;
+        index = targetIndex;
+        updateUI();
+        const localPosition = player.getCurrentTime();
+        const currentlyPlaying = player.getPlayerState() === YT.PlayerState.PLAYING;
+        if (!alreadyOnTrack) {
+          player.loadVideoById(playlist[index].id, target);
+        } else if (Math.abs(localPosition - target) > 2) {
+          player.seekTo(target, true);
+        }
+        // Do not restart an already-playing local player after its own command
+        // returns from the server: that would turn a click into blocked autoplay.
+        if (state.isPlaying && !currentlyPlaying) { player.playVideo(); setPlaying(true); startTick(); }
+        else if (!state.isPlaying && currentlyPlaying) { player.pauseVideo(); setPlaying(false); stopTick(); }
       };
       if (!ready) initYouTube(apply); else apply();
     }
