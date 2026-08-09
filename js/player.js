@@ -194,6 +194,11 @@
     els.volumeBtn.setAttribute("aria-expanded", String(open));
   }
 
+  function collapsePlayer() {
+    els.playerShell.classList.remove("expanded");
+    els.playerToggle.setAttribute("aria-expanded", "false");
+  }
+
   function createPlayer() {
     if (player) return;
     const track = playlist[index];
@@ -286,8 +291,16 @@
     els.playerToggle.setAttribute("aria-expanded", String(expanded));
   });
   els.minimizeBtn.addEventListener("click", function () {
-    els.playerShell.classList.remove("expanded");
-    els.playerToggle.setAttribute("aria-expanded", "false");
+    collapsePlayer();
+  });
+  document.addEventListener("click", function (event) {
+    if (
+      els.playerShell.classList.contains("expanded") &&
+      !event.target.closest("#player-shell") &&
+      event.target.closest(".app, .wallpaper, .overlay")
+    ) {
+      collapsePlayer();
+    }
   });
   els.nextBtn.addEventListener("click", next);
   els.prevBtn.addEventListener("click", prev);
