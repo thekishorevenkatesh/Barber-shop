@@ -16,5 +16,16 @@
   els.join.addEventListener("submit",(event)=>{event.preventDefault();enter("JOIN_ROOM",{roomCode:els.code.value.toUpperCase(),displayName:displayName()});});
   els.leave.addEventListener("click",()=>{ if(window.walkieTalkie)window.walkieTalkie.stop();if(socket){socket.emit("LEAVE_ROOM");socket.disconnect();}socket=null;roomCode=null;state=null;els.panel.classList.add("hidden");els.entry.classList.remove("hidden"); });
   els.copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(roomCode);els.copy.textContent="Copied";setTimeout(()=>els.copy.textContent="Copy",1000);}catch(_){error("Copy the room code manually.");}});
-  window.roomClient = { isActive:()=>Boolean(socket&&roomCode), isApplying:()=>applying, userId:()=>userId, members:()=>state ? state.members : [], command:(type,position)=>socket&&socket.emit("MUSIC_COMMAND",{type,position},()=>{}), talk:(event,ack)=>socket&&socket.emit(event,ack), signal:(to,signal)=>socket&&socket.emit("WEBRTC_SIGNAL",{to,signal}) };
+  function command(type, position) {
+    if (!socket || !socket.connected) {
+      document.getElementById("player-status").textContent = "Room connection lost — reconnecting…";
+      return;
+    }
+    socket.timeout(8000).emit("MUSIC_COMMAND", { type, position }, (requestError, result) => {
+      if (requestError || !result || !result.ok) {
+        document.getElementById("player-status").textContent = result && result.error ? result.error : "Room server did not confirm the music action.";
+      }
+    });
+  }
+  window.roomClient = { isActive:()=>Boolean(socket&&roomCode), isApplying:()=>applying, userId:()=>userId, members:()=>state ? state.members : [], command, talk:(event,ack)=>socket&&socket.emit(event,ack), signal:(to,signal)=>socket&&socket.emit("WEBRTC_SIGNAL",{to,signal}) };
 })();
